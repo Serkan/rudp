@@ -8,6 +8,7 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 
 import org.network.nudp.core.ClientRUDPSocket;
+import org.network.nudp.file.util.Compressor;
 
 public class sendFile {
 
@@ -51,9 +52,8 @@ public class sendFile {
         } else {
             buffer = new byte[FileTransferConstants.BUFFER_SIZE];
         }
-
         while (stream.read(buffer) > 0) {
-            sender.sendBytes(buffer);
+            sender.sendBytes(Compressor.zip(buffer));
         }
         stream.close();
         sender.close();

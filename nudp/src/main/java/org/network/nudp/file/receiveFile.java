@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.network.nudp.core.ServerRUDPSocket;
+import org.network.nudp.file.util.Compressor;
 
 public class receiveFile {
 
@@ -46,8 +47,9 @@ public class receiveFile {
         FileOutputStream stream = new FileOutputStream(file);
         while (temp != filesize) {
             byte[] data = server.receiveBytes();
-            temp += data.length;
-            stream.write(data, 0, data.length);
+            byte[] unzipped = Compressor.unzip(data);
+            temp += unzipped.length;
+            stream.write(unzipped, 0, unzipped.length);
         }
         stream.close();
 
