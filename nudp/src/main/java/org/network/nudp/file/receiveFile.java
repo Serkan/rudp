@@ -13,6 +13,7 @@ public class receiveFile {
 	public static void main(String[] args) throws IOException {
 		String arg0 = null;
 		Integer listenPort = null;
+		listenPort = 7777;
 		try {
 			arg0 = args[0];
 			if (arg0 != null) {
@@ -23,7 +24,6 @@ public class receiveFile {
 		} catch (IndexOutOfBoundsException e) {
 			warning();
 		}
-		listenPort = 7777;
 		// Start server
 		ServerRUDPSocket server = new ServerRUDPSocket(listenPort);
 		byte[] metaData = server.receiveBytes();
