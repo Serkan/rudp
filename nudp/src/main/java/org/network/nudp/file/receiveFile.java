@@ -39,7 +39,10 @@ public class receiveFile {
 		fileName = fileName.substring(fileName.lastIndexOf("\\") + 1,
 				fileName.length());
 		fileName = fileName.trim();
-		String name = FileTransferConstants.DOWNLOAD_DIR + fileName + "alindi";
+		int period = fileName.lastIndexOf(".");
+		fileName = fileName.substring(0, period - 1) + "_alindi"
+				+ fileName.substring(period);
+		String name = FileTransferConstants.DOWNLOAD_DIR + fileName;
 		File file = new File(name);
 		if (!file.exists()) {
 			file.createNewFile();
@@ -55,8 +58,8 @@ public class receiveFile {
 	}
 
 	private static void warning() {
-		System.out
-				.println("Kullanım şekli : 'receiveFile <port>' ,"
-						+ "port belirtmemeniz durumunda varsayılan olarak 7777 portu kullanılacaktır");
+		System.out.println("Kullanım şekli : " + "'receiveFile <port>' ,"
+				+ "port belirtmemeniz durumunda"
+				+ " varsayılan olarak 7777 portu " + "kullanılacaktır");
 	}
 }
