@@ -48,6 +48,8 @@ public final class Constants {
     // socket ti̇me out
     public static final int SOCKET_TIMEOUT = 5000;
 
+    public static final byte CLOSE = (byte) 255;
+
     /**
      * Hidden constructor.
      */

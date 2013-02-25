@@ -155,7 +155,11 @@ public class ClientRUDPSocket {
         socket.send(sendDatagram);
     }
 
-    public void close() {
+    public void close() throws IOException {
+        byte[] ba = new byte[1];
+        ba[0] = Constants.CLOSE;
+        DatagramPacket packet = new DatagramPacket(ba, 1, destAddress, destPort);
+        socket.send(packet);
         socket.close();
     }
 

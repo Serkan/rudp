@@ -6,6 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Server impl of reliable {@link DatagramSocket}.<br>
@@ -17,7 +19,7 @@ public class ServerRUDPSocket {
 
     private final DatagramSocket socket;
 
-    private DataWrapper dataWrapper;
+    private Map<InetAddress, RUDPConnection> connections;
 
     /**
      * 
@@ -28,6 +30,7 @@ public class ServerRUDPSocket {
      */
     public ServerRUDPSocket(int port) throws SocketException {
         socket = new DatagramSocket(port);
+        connections = new WeakHashMap<InetAddress, RUDPConnection>();
     }
 
     /**
@@ -35,8 +38,7 @@ public class ServerRUDPSocket {
      * 
      * @throws IOException
      */
-    public byte[] receiveBytes() throws IOException {
-        dataWrapper = new DataWrapper();
+    public void listen(RUDPHandler handler) throws IOException {
         while (true) {
             byte[] packet = new byte[Constants.FRAME_SIZE
                     + Constants.SEQUENCE_SIZE + Constants.LENGTH_SIZE + 1];
@@ -54,7 +56,7 @@ public class ServerRUDPSocket {
              * 
              * 00-> data packet 11-> end of stream
              */
-            if (metaData == Constants.DATA_PACKET) {
+            if (metaData == Constants.DATA_PACKET && isValid(senderAddress)) {
                 byte[] baSequence = new byte[Constants.SEQUENCE_SIZE];
                 byte[] baLength = new byte[Constants.LENGTH_SIZE];
                 // second four byte for sequence number
@@ -95,7 +97,8 @@ public class ServerRUDPSocket {
                     continue;
                 }
                 // we assume we did not get any exception after this
-                dataWrapper.submitSequence(sequence, data);
+                RUDPConnection connection = connections.get(senderAddress);
+                connection.getDataWrapper().submitSequence(sequence, data);
             } else if (metaData == Constants.HANDSHAKE_PACKET_TYPE) {
                 byte[] baMsg = new byte[Constants.HELO_MSG_SIZE];
                 System.arraycopy(innerPacket, 1, baMsg, 0, 4);
@@ -105,11 +108,23 @@ public class ServerRUDPSocket {
                     DatagramPacket olehPacket = new DatagramPacket(baOleh,
                             baOleh.length, senderAddress, senderPort);
                     socket.send(olehPacket);
+                    RUDPConnection connection = new RUDPConnection(handler);
+                    connections.put(senderAddress, connection);
                 }
-            } else if (metaData == Constants.EOF_PACKET) {
-                return dataWrapper.byteArray();
+            } else if (metaData == Constants.EOF_PACKET
+                    && isValid(senderAddress)) {
+                RUDPConnection connection = connections.get(senderAddress);
+                connection.handle(senderAddress, connection.getDataWrapper()
+                        .byteArray());
+            } else if (metaData == Constants.CLOSE) {
+                RUDPConnection connection = connections.get(senderAddress);
+                connection.setClose(true);
             }
         }
     }
 
+    private boolean isValid(InetAddress senderAddress) {
+        RUDPConnection connection = connections.get(senderAddress);
+        return !(connection == null || connection.isClose());
+    }
 }
