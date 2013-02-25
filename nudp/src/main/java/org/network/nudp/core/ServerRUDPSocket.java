@@ -77,21 +77,21 @@ public class ServerRUDPSocket {
                 // of
                 // data because of
                 // corruption then it must be resend current sequence data
-                byte[] resendRequest = new byte[Constants.ACK_PACKET_SIZE];
+                byte[] acknowledge = new byte[Constants.ACK_PACKET_SIZE];
                 // send a positive ack packet
-                resendRequest[0] = Constants.POS_ACK_PACKET;
+                acknowledge[0] = Constants.POS_ACK_PACKET;
                 try {
                     System.arraycopy(innerPacket, index, data, 0, length);
                 } catch (IndexOutOfBoundsException ex) {
                     // send a negative ack packet and request the packet
-                    resendRequest[0] = Constants.NEG_ACK_PACKET;
+                    acknowledge[0] = Constants.NEG_ACK_PACKET;
                 }
-                System.arraycopy(baSequence, 0, resendRequest, 1,
+                System.arraycopy(baSequence, 0, acknowledge, 1,
                         Constants.SEQUENCE_SIZE);
-                DatagramPacket p = new DatagramPacket(resendRequest,
+                DatagramPacket p = new DatagramPacket(acknowledge,
                         Constants.ACK_PACKET_SIZE, senderAddress, senderPort);
                 socket.send(p);
-                if (resendRequest[0] == Constants.NEG_ACK_PACKET) {
+                if (acknowledge[0] == Constants.NEG_ACK_PACKET) {
                     continue;
                 }
                 // we assume we did not get any exception after this
