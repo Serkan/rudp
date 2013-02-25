@@ -14,19 +14,19 @@ import org.network.nudp.file.util.Compressor;
 public class sendFile {
 
 	public static void main(String[] args) throws IOException {
-		InetAddress address = InetAddress.getByName("127.0.0.1");
-		Integer listenPort = 7777;
-		String fileName = "D:\\mail.jar";
-		// try {
-		// String ipport = args[0];
-		// String[] destInfo = ipport.split(":");
-		// listenPort = Integer.parseInt(destInfo[0]);
-		// address = InetAddress.getByName(destInfo[1]);
-		// fileName = args[1];
-		// } catch (IndexOutOfBoundsException e) {
-		// System.out
-		// .println("Kullanım şekli : 'sendFile <alıcı_ip>:<alıcı_port> <dosya adı>'");
-		// }
+		InetAddress address = null;
+		Integer listenPort = null;
+		String fileName = null;
+		try {
+			String ipport = args[0];
+			String[] destInfo = ipport.split(":");
+			listenPort = Integer.parseInt(destInfo[0]);
+			address = InetAddress.getByName(destInfo[1]);
+			fileName = args[1];
+		} catch (IndexOutOfBoundsException e) {
+			System.out
+					.println("Kullanım şekli : 'sendFile <alıcı_ip>:<alıcı_port> <dosya adı>'");
+		}
 		ClientRUDPSocket sender = null;
 		try {
 			sender = new ClientRUDPSocket(listenPort, address);
